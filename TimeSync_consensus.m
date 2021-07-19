@@ -102,12 +102,20 @@ for k=1:nNode
     measNoise((k-1)*2+1:(k-1)*2+2,:)=mvnrnd(mu,Q,szsim)'; 
 end
 %% Simulaiton Configuration 2b: Controller Design  
-% static control gain is obtained by using the LMI technique
-% the control gain from LMI of Chang2020
-K = [0.7615 0; 0 0.1253]
+% dynaimc control gain is obtained by using the LMI technique
+% K = [A_K B_K; C_K D_K]
+K = [1 0 1 0; 0 1 0 1; 1 0 1 0; 0 1 0 1];
+A_K = K(1:2, 1:2);
+B_K = K(1:2, 3:4);
+C_K = K(3:4, 1:2);
+D_K = K(3:4, 3:4);
 
 format long   
-fprintf("Static controller gain K is given by using LMI:\n"); disp(K);
+fprintf("Dynamic controller gain A_K, B_K, C_K, D_K are given by using LMI:\n"); 
+fprintf("A_K = \n"); disp(A_K);
+fprintf("B_K = \n"); disp(B_K);
+fprintf("C_K = \n"); disp(C_K);
+fprintf("D_K = \n"); disp(D_K);
 format short
 %% Simulaiton Configuration 2c: Clock & Networked State Initialisation
 % initialising the clock offset and skew (between 0 and 50ppm)
@@ -168,6 +176,13 @@ A1=kron(eye(nNode),A); % Kronecker product(克罗内克积)
 BK=B*K;
 BK1=kron(NetTree,BK);    
 B1=kron(eye(nNode),B*K);
+
+% x_F[k+1] = A_F * x_F[k] + B_F * y[k]
+
+
+B_K1=kron(eye(nNode),B*B_K);
+D_K1=kron(eye(nNode),B*D_K);
+
 NetTreeTemp=kron(NetTree,eye(2)); % B1*L1 is the same as BK1
 
 if chkEigAc(A,B,K,NetTree)==false
@@ -185,6 +200,10 @@ for k = 2:szsim
     % state and output updates, see eq.26, 27 in Hu2019
     U=NetTreeTemp*y(:,k-1); % get the output differece with neighbours
     x(:,k)=A1*x(:,k-1)-B1*U+procNoise(:,k-1); % state updates
+    
+    + B_K1*U
+    + D_K1*U
+    
     y(:,k)=x(:,k)+measNoise(:,k); % output updates
 
     % collect the synchronisation error for result analysis
