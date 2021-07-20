@@ -105,7 +105,7 @@ end
 % dynaimc control gain is obtained by using the LMI technique
 % K = [A_K B_K; C_K D_K]
 run LMI.m
-K=-K; % We use A+BKC rather than A-BKC, so let K=-K to meet your program
+K=-K; % 'A+BKC' is used, NOT 'A-BKC', so let K=-K
 A_K = K(1:2, 1:2);
 B_K = K(1:2, 3:4);
 C_K = K(3:4, 1:2);
@@ -117,7 +117,7 @@ fprintf("A_K = \n"); disp(A_K);
 fprintf("B_K = \n"); disp(B_K);
 fprintf("C_K = \n"); disp(C_K);
 fprintf("D_K = \n"); disp(D_K);
-fprintf("The H_infty performance gamma = \n"); disp(Gamma);
+fprintf("The H_infty performance gamma by LMI is \n"); disp(Gamma);
 format short
 %% Simulaiton Configuration 2c: Clock & Networked State Initialisation
 % initialising the clock offset and skew (between 0 and 50ppm)
@@ -190,8 +190,8 @@ NetTreeTemp=kron(NetTree,eye(2)); % B1*L1 is the same as BK1
 % else
 %     disp("     Good,stable system (two eigenvalue ==1, others <1)");
 % end
-strK=num2str(K);
-fprintf("     K=[%s ;\n        %s]\n", strK(1,:), strK(2,:));
+% strK=num2str(K);
+% fprintf("     K=[%s ;\n        %s]\n", strK(1,:), strK(2,:));
 fprintf("    simulaiton is in process");
 
 for k = 2:szsim

@@ -276,22 +276,22 @@
 
     c(j)=trace(gaj);  % sum of diagonal elements.
     end
-    options=[1e-5,500,0,0,0]
+    options=[1e-5,500,0,0,0];
     [copt,xopt]=mincx(lmis,c,options);
 
-    Gamma=sqrt(dec2mat(lmis,xopt,gamma))   
+    Gamma=sqrt(dec2mat(lmis,xopt,gamma));
     
     u1=dec2mat(lmis,xopt,U1);
     u2=dec2mat(lmis,xopt,U2);
     u3=dec2mat(lmis,xopt,U3);
     u4=dec2mat(lmis,xopt,U4);
-    u=[u1 u2; u3 u4]
+    u=[u1 u2; u3 u4];
     
     v1=dec2mat(lmis,xopt,V1);
     v2=dec2mat(lmis,xopt,V2);
     v3=dec2mat(lmis,xopt,V3);
     v4=dec2mat(lmis,xopt,V4);    
-    v=[v1 v2; v3 v4]
+    v=[v1 v2; v3 v4];
     
     K=theta*inv(u)*v;    
 
@@ -299,7 +299,7 @@
 %     clear lmis, sv1, sv2, v1, v2, V;
 %     clear G1, G2, G3, G4, P, gamma;
     
-    Gamma    
-    K
+%     Gamma    
+%     K
     
 % end
