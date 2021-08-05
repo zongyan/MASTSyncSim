@@ -41,8 +41,8 @@ disp(L);
 % the item of omega_gamma corresponds to integeral controller in my paper
 A=[1 1;0 1];
 B=[1 0;0 1];
-alpha=0.5;
-beta=0.025;
+alpha=1;
+beta=0;
 K=[alpha 0;beta 0]; % the control gain is the same as that in the experiments 
 fprintf("Control Gain K="); disp(K);
 
@@ -205,5 +205,5 @@ fprintf("    mean value of all nodes at end: [offset_ba=%d]\n",Ybar(1,sz));
 fprintf("    with standard deviation [%d]\n", Ystd(1,k));
 
 cd 'C:\Users\yan\Documents\Projects\ctrl_anlys\LinearSearchIteration';
-save('simulation_all_parameters');
-save('ts_precision','yerr');
+save('simulation_all_parameters_PISync');
+save('ts_precision_PISync','yerr');
