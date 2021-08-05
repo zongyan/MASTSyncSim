@@ -204,6 +204,6 @@ fprintf("Simulation Done!  %d nodes, %d sync steps\n",nNode,sz);
 fprintf("    mean value of all nodes at end: [offset_ba=%d]\n",Ybar(1,sz));
 fprintf("    with standard deviation [%d]\n", Ystd(1,k));
 
-cd 'C:\Users\yan\Documents\Projects\ctrl_anlys\LinearSearchIteration';
+cd 'C:\Doc\Projects\ctrl_anlys\LinearSearchIteration';
 save('simulation_all_parameters_PISync');
 save('ts_precision_PISync','yerr');
