@@ -108,12 +108,12 @@ for k=1:nNode
 end
 %% Simulaiton Configuration 2b: Controller Design  
 % the control gain in our paper
-alpha = 0.5;
-beta = 0.025;
+% alpha = 0.5;
+% beta = 0.025;
 
 % the control gain from Yildirim2018, PISync
-% alpha = 1;
-% beta = 1/((32.768*10^3)*1); % see equ (9) of Yildirim2018
+alpha = 1;
+beta = 1/((32.768*10^3)*1); % see equ (9) of Yildirim2018
 
 K = [alpha 0; 0 beta];
 
@@ -227,3 +227,6 @@ for k = 2:szsim
 end
 
 fprintf('\n Simulation Ends\n');
+
+save('simulation_all_parameters_PISync');
+save('ts_precision_PISync','yerr');
