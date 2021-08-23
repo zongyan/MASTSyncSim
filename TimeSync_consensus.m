@@ -17,7 +17,7 @@ clc;
 %% Simulaiton Configuration 1: Network Topology
 disp("Clock Synchronization Simulation");
 
-szsim=800; % simulation time
+szsim=2000; % simulation time
 
 nNode = 6; % it possess 1 master node and 6 slave nodes
 L = [0 0 0 0 0 0;
@@ -80,8 +80,8 @@ disp(NetTree);
 % If abs(obs-mean(obs))>3*sd(obs) ===> you've got something unusual.
 %
 
-sigma1sqr=10^-12; % variance of offset noise, from Clock A of Giorgi2011
-sigma2sqr=10^-12; % variance of skew noise, from Clock A of Giorgi2011
+sigma1sqr=10^-6; % variance of offset noise, from Clock A of Giorgi2011
+sigma2sqr=10^-6; % variance of skew noise, from Clock A of Giorgi2011
 sigma3sqr=(4*10^(-6))^2; % variance of measurement noise, from Zong2019c
 
 mu=[0 0];
@@ -122,10 +122,10 @@ fprintf("Static controller gain K is given by using LMI:\n"); disp(K);
 format short
 %% Simulaiton Configuration 2c: Clock & Networked State Initialisation
 % initialising the clock offset and skew (between 0 and 50ppm)
-a0=600000; % initial offset is 600ms 
+a0=800000; % initial offset is 600ms 
 b0=400000; % initial skew is 4 x 10^5 ppm
 a=200000; % initial offset variation range: +/- 200 ms uniform distribution
-b=25;   % initial skew variation raange: +/- 25 uniform distribution
+b=20000;   % initial skew variation raange: +/- 20000 uniform distribution
 theta0=a0+a*2*(rand(1,nNode)-0.5); 
 stdOffset=sqrt((2*a)^2/12); % std. dev. for uniform dist. sqrt((max-min)^2/12)
 gamma0=b0+b*2*(rand(1,nNode)-0.5); 
