@@ -221,7 +221,7 @@ for k = 2:szsim
         end 
     end
     
-    for i=1:nNode       
+    for i=2:nNode       
         
         if y((i-1)*2+1, k) > (b*2*2 / 32768)        
             beta_list(i, 1) = 0;
