@@ -113,7 +113,8 @@ end
 
 % the control gain from Yildirim2018, PISync
 alpha = 1;
-beta = 1/((32.768*10^3)*1); % see equ (9) of Yildirim2018
+beta = 0; % see equ (9) of Yildirim2018
+initial_beta = 1/32768;
 
 K = [alpha 0; 0 beta];
 
@@ -145,6 +146,7 @@ B=[1 0;0 1];
 x=zeros(2*nNode,szsim); % state, a matrix for states at all sz simulation steps
 y=zeros(2*nNode,szsim); % output, a matrix for outputs at all sz simulation steps
 yerr=zeros(2*nNode,szsim); % synchronisation error
+Beta=zeros(nNode,szsim);
 
 indTheta=1:2:nNode*2-1;  % row index for theta
 indSkew=2:2:nNode*2; % row index for skew
@@ -178,7 +180,16 @@ hfigsim=figure('Name','Simulation Animation');
 A1=kron(eye(nNode),A); % Kronecker product(克罗内克积)
 BK=B*K;
 BK1=kron(NetTree,BK);    
-B1=kron(eye(nNode),B*K);
+
+% B1=kron(eye(nNode),B*K); % all the initial control gains are same
+alpha_list = alpha * ones([nNode, 1]);
+beta_list = beta * ones([nNode, 1]);
+B1 = zeros([2*nNode,2*nNode]);
+for i=1:nNode
+    B1((i-1)*2+1, (i-1)*2+1) = alpha_list(i, 1);
+    B1((i-1)*2+2, (i-1)*2+2) = beta_list(i, 1);
+end
+
 NetTreeTemp=kron(NetTree,eye(2)); % B1*L1 is the same as BK1
 
 if chkEigAc(A,B,K,NetTree)==false
@@ -198,12 +209,44 @@ for k = 2:szsim
     x(:,k)=A1*x(:,k-1)-B1*U+procNoise(:,k-1); % state updates
     y(:,k)=x(:,k)+measNoise(:,k); % output updates
 
+     % update the controlling gain
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%          
+    if k>3
+        y_product = (y(:,(k)) - y(:,k-1)) .* (y(:,(k-1)) - y(:,k-2));
+    else                    
+        if k == 2
+            y_product = (y(:,(k)) - y(:,k-1)) .* (y(:,(k-1)) - zeros(2*nNode,1));    
+        elseif k == 1
+            y_product = zeros(2*nNode,1);
+        end 
+    end
+    
+    for i=1:nNode       
+        
+        if y((i-1)*2+1, k) > (b*2*2 / 32768)        
+            beta_list(i, 1) = 0;
+        elseif beta_list(i, 1) == 0
+            beta_list(i, 1) = initial_beta;
+        elseif y_product((i-1)*2+1, 1) > 0
+            beta_list(i, 1) = beta_list(i, 1) * 2; % lambda^+ = 2
+            beta_list(i, 1) = max(beta_list(i, 1), initial_beta);
+        else
+            beta_list(i, 1) = beta_list(i, 1) / 3; % lambda^- = 3            
+        end 
+        
+        B1((i-1)*2+1, (i-1)*2+1) = alpha_list(i, 1);
+        B1((i-1)*2+2, (i-1)*2+2) = beta_list(i, 1);
+    end           
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     % collect the synchronisation error for result analysis
     yy=x;
     yk=y(:,k);
     Ybar(:,k)=[mean(yk(indTheta)');mean(yk(indSkew)')];
     Ystd(:,k)=[std(yk(indTheta)');std(yk(indSkew)')];
     yerr(:,k)=yy(:,k);
+    
+    Beta(:,k)=beta_list;
    
    % for animaltion during simulation
     if (k<10) || (k<100 && (mod(k,10)==0)) ||(k>100 && mod(k,50)==0)
