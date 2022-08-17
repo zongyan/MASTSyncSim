@@ -6,9 +6,9 @@ clc;
 
 % random network generation
 nNode=50; nEdge=70; % minimum num edges for undirected connected 
-                         % graph: N-1
-                         % maximum num edges for undirected connected 
-                         % graph: N*(N-1)/2
+                    % graph: N-1
+                    % maximum num edges for undirected connected 
+                    % graph: N*(N-1)/2
 nSample=200;
 
 [G Tree]=genNet(nNode,nEdge,nSample,true);

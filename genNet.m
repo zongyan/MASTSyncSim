@@ -108,15 +108,14 @@ while true  % for user decide if a graph is suitable
         fprintf("A connected network of %d node, %d edges are created successfully\n",nNode, nEdge);
 
         if length(netTreeAll)==1        
-            netTreeAll=full(adjacency(netTree)); % convert sparse laplacian matrix to full storage
-            netGraphAll=full(adjacency(netG)); % convert sparse laplacian matrix to full storage
+            netTreeAll=full(adjacency(netTree)); % convert sparse adjacency matrix to full storage
+            netGraphAll=full(adjacency(netG)); % convert sparse adjacency matrix to full storage
         else
             tmp=size(full(adjacency(netTree)));
             if tmp==nNode          
-                netTreeAll=cat(3, netTreeAll, full(adjacency(netTree)));
-                netGraphAll=cat(3, netGraphAll, full(adjacency(netG)));      
-            end 
-
+                netTreeAll=cat(3, netTreeAll, full(adjacency(netTree))); % convert sparse adjacency matrix to full storage
+                netGraphAll=cat(3, netGraphAll, full(adjacency(netG))); % convert sparse adjacency matrix to full storage      
+            end
         end
 
     end
@@ -125,26 +124,11 @@ while true  % for user decide if a graph is suitable
     end
     
     if length(size(netTreeAll))==3
-        sizeNet=size(netTreeAll);
-        if sizeNet(3)==nSample 
-            disp('Is the auto generated network ok (Y/R/Q)? \n');
-            disp('    yY  ---   grah is good. Process to next step');
-            disp('    rR  ---   retry to generate another graph');
-            disp('    qQ  ---   quit without network graph. return with []');
-            x = input( 'Type your choice:', 's');
-            if x == 'y' || x=='Y'
-                fprintf("Both graph (%d nodes, %d edges) and its minimal spanning tree (%d edges) are created\n", ...
-                    nNode,nEdge,nEdge);
-                break;
-            elseif x=='r' || x=='R'
-                disp('Try again to generate another network...\n');
-                % close(fh);fh=[];
-                continue;
-            else
-                netG=[];
-                disp('NO graph is created. User select to quit.\n');
-                return;
-            end
+        sizeNets=size(netTreeAll);
+        if sizeNets(3)==nSample 
+            fprintf("Both graph (%d nodes, %d edges) and its minimal spanning tree (%d edges) are created\n", ...
+                nNode,nEdge,nEdge);
+            break;
         end
     end 
     
