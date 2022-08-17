@@ -1,39 +1,43 @@
-function [netG netTree]= genNet(nNode,nEdge,isCmdPromtEnabled)
-% genNet 
-% to generate a random network 
+function [netGraphAll netTreeAll]= genNet(nNode,nEdge,nSample,isCmdPromtEnabled)
+% genNet is used to generate a random network topology 
 % Input arguments: nNode   expected number of nodes, default 5 nodes
-%                  nEdge   expected number of edges, default 15 edges
+%                  nEdge   expected number of edges, default 8 edges
+%                  nSample expected number of samples for generation
 %                  isCmdPromtEnabled   1 allow user select the suitable network
-%                  graph
-% Output arguments: netG   the graph object of the network generated
+%                                      graph
+% Output arguments: netG   the graph object of the generated network
             
 % if command prompt is enabled 
- if nargin==3
-     cmdp= isCmdPromtEnabled==1;
- else
-     cmdp=false
- end
- if nargin==1
-        if nNode>4
-            nEdge=2*nNode;
-        else
-            nEdge=6;
-        end
- elseif nargin==0
-     nNode=5; nEdge=8;
- end
- 
+if nargin==4 % number of function input arguments 
+    cmdp= isCmdPromtEnabled==true;
+else
+    cmdp=false
+end
+
+if nargin==1
+    if nNode>4
+        nEdge=2*nNode;
+    else
+        nEdge=6;
+    end
+elseif nargin==0
+    nNode=5; nEdge=8;
+end
+
+netTreeAll=0;
+netGraphAll=0;
+
 fh=figure('Name', 'Network Graph');
 while true  % for user decide if a graph is suitable 
     for i=50:-1:1   % search for a connected graph
         % generate nEdge connections randommanly
         st = randi(nNode, nEdge, 2);
         
-        % check and remove selfloop and duplicated edges
+        % check and remove self-loop and duplicated edges
         nSelfloop=1;
         nDupEdge=1;
         while (nSelfloop ~= 0 || nDupEdge~=0 )
-            % check self loop
+            % check self-loop
             selfLp=diff(st,[],2)==0;
             nSelfloop=sum(selfLp);
             if nSelfloop ~=0
@@ -58,9 +62,7 @@ while true  % for user decide if a graph is suitable
             st = [st;randi(nNode,nSelfloop+nDupEdge,2)];
             fprintf("found and replaced %d selfloops, %d duplicated Edges\n",nSelfloop,nDupEdge);
         end
-        
-       
-        
+                      
         fprintf("No selfloops, neither duplicated edges\n");
         s = st(:,1); t = st(:,2);
         netG=graph(s,t);
@@ -75,6 +77,8 @@ while true  % for user decide if a graph is suitable
         % Get number of zero eigenvalues
         num=sum(lambda<=0.00001);
         discon=num>1; % more than one 0 eigenvalue, disconnected
+                      % the second smallest eigenvalue is greater than 0 
+                      % iff G is a connected graph. 
         if discon
             disp (['Graph is not connected. ' num2str(num) ' connected subgraphs.']);
             fprintf('+++++++   Try again (i=%d) +++++++\n',i);
@@ -87,46 +91,63 @@ while true  % for user decide if a graph is suitable
     figure(fh); hold off;
     hfig=plot(netG);title(sprintf("network of %d nodes, %d edges",nNode, nEdge));
     
+    % a minimum spanning tree is a subset of the edges of a connected undirected graph 
+    % that connects all the vertices together, without any cycles and with 
+    % the minimum possible total edge weight.
     [netTree,pred] = minspantree(netG);
     highlight(hfig,netTree)
 
     fprintf("the Laplacian Matrix of the generated network is \n")
     L=laplacian(netG); % a sparse matrix of L
-    % disp(L); % diaplay spares matrix L
-    disp(full(L)); % convert sparse matrix to full storage
+    % disp(full(L)); % convert sparse matrix to full storage
 
     if i<=1
         warning("Failed to generate a connected network with %d nodes and %d edges",...
             nNode, nEdge);
-        disp("Press any key to continue ...");
-        pause
     else
         fprintf("A connected network of %d node, %d edges are created successfully\n",nNode, nEdge);
+
+        if length(netTreeAll)==1        
+            netTreeAll=full(adjacency(netTree)); % convert sparse laplacian matrix to full storage
+            netGraphAll=full(adjacency(netG)); % convert sparse laplacian matrix to full storage
+        else
+            tmp=size(full(adjacency(netTree)));
+            if tmp==nNode          
+                netTreeAll=cat(3, netTreeAll, full(adjacency(netTree)));
+                netGraphAll=cat(3, netGraphAll, full(adjacency(netG)));      
+            end 
+
+        end
+
     end
     if ~cmdp
         break;
     end
     
-    disp('Is the auto generated network ok (Y/R/Q)? \n');
-    disp('    yY  ---   grah is good. Process to next step');
-    disp('    rR  ---   retry to generate another graph');
-    disp('    qQ  ---   quit without network graph. return with []');
-    x = input( 'Type your choice:', 's');
-    if x == 'y' || x=='Y'
-        fprintf("Both graph (%d nodes, %d edges) and its minimal spanning tree (%d edges) are created\n", ...
-            nNode,nEdge,nEdge);
-        break;
-    elseif x=='r' || x=='R'
-        disp('Try again to generate another network...\n');
-        % close(fh);fh=[];
-        continue;
-    else
-        netG=[];
-        disp('NO graph is created. User select to quit.\n');
-        return;
-    end
-end % end while
+    if length(size(netTreeAll))==3
+        sizeNet=size(netTreeAll);
+        if sizeNet(3)==nSample 
+            disp('Is the auto generated network ok (Y/R/Q)? \n');
+            disp('    yY  ---   grah is good. Process to next step');
+            disp('    rR  ---   retry to generate another graph');
+            disp('    qQ  ---   quit without network graph. return with []');
+            x = input( 'Type your choice:', 's');
+            if x == 'y' || x=='Y'
+                fprintf("Both graph (%d nodes, %d edges) and its minimal spanning tree (%d edges) are created\n", ...
+                    nNode,nEdge,nEdge);
+                break;
+            elseif x=='r' || x=='R'
+                disp('Try again to generate another network...\n');
+                % close(fh);fh=[];
+                continue;
+            else
+                netG=[];
+                disp('NO graph is created. User select to quit.\n');
+                return;
+            end
+        end
+    end 
     
-
+end % end while
 end
 
