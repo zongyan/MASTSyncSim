@@ -107,12 +107,21 @@ while true  % for user decide if a graph is suitable
     else
         fprintf("A connected network of %d node, %d edges are created successfully\n",nNode, nEdge);
 
-        if length(netTreeAll)==1        
-            netTreeAll=full(adjacency(netTree)); % convert sparse adjacency matrix to full storage
-            netGraphAll=full(adjacency(netG)); % convert sparse adjacency matrix to full storage
+        if length(netTreeAll)==1   
+            tmp=size(full(adjacency(netTree)));
+            fprintf("The dimension of the adjacency matrix is: \n");
+            disp(tmp);
+
+            if tmp(1)==nNode
+                netTreeAll=full(adjacency(netTree)); % convert sparse adjacency matrix to full storage
+                netGraphAll=full(adjacency(netG)); % convert sparse adjacency matrix to full storage
+            end
         else
             tmp=size(full(adjacency(netTree)));
-            if tmp==nNode          
+            fprintf("The dimension of the adjacency matrix is: \n");            
+            disp(tmp)
+            
+            if tmp(1)==nNode          
                 netTreeAll=cat(3, netTreeAll, full(adjacency(netTree))); % convert sparse adjacency matrix to full storage
                 netGraphAll=cat(3, netGraphAll, full(adjacency(netG))); % convert sparse adjacency matrix to full storage      
             end
